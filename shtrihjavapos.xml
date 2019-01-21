@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+    <FiscalPrinter>
+        <ShtrihFptr>
+            <Images/>
+            <ReceiptImages/>
+            <Header>
+                <Line DoubleWidth="0" Text="           &#x413;&#x411;&#x423;&#x417; &#x410;&#x41e; &#x410;&#x41c;&#x41e;&#x41a;&#x411;"/>
+                <Line DoubleWidth="0" Text="    414056,&#x410;&#x441;&#x442;&#x440;&#x430;&#x445;&#x430;&#x43d;&#x44c;,&#x422;&#x430;&#x442;&#x438;&#x449;&#x435;&#x432;&#x430;,2"/>
+                <Line DoubleWidth="0" Text=""/>
+                <Line DoubleWidth="0" Text=""/>
+            </Header>
+            <Trailer>
+                <Line DoubleWidth="0" Text=""/>
+                <Line DoubleWidth="0" Text=""/>
+                <Line DoubleWidth="0" Text=""/>
+            </Trailer>
+            <NonFiscal DocumentNumber="5"/>
+        </ShtrihFptr>
+    </FiscalPrinter>
+</root>

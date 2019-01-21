@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration>
+
+   <appender name="CONSOLE-WARN" class="com.shtrih.util.ConsoleAppender">
+     <param name="Encoding" value="UTF-8"/>
+     <param name="target" value="System.err"/>
+     <layout class="com.shtrih.util.PatternLayout">
+       <param name="ConversionPattern" value="[%7r] [%t] %6p - %14.14c - %m%n"/>
+     </layout>
+     <filter class="com.shtrih.util.varia.LevelRangeFilter">
+       <param name="LevelMin" value="DEBUG"/>
+     </filter>
+   </appender>
+
+
+
+
+
+</log4j:configuration>

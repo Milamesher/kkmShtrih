@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <build.plugins.plugin.version>1</build.plugins.plugin.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+
+    </properties>
+    <groupId>com.varamila</groupId>
+    <artifactId>posf</artifactId>
+    <version>2.0</version>
+    <packaging>jar</packaging>
+    <name>tk</name>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.1.RELEASE</version>
+    </parent>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.5</version>
+        </dependency>
+
+
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com</groupId>
+            <artifactId>com.shtrih.fiscalprinter</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>C:/KASSAlibs/shtrihjavapos.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>jpos</groupId>
+            <artifactId>jpos</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>C:/KASSAlibs/jpos113-controls.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>jpos</groupId>
+            <artifactId>jpos</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>C:/KASSAlibs/jpos113.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>nrjavaserial</groupId>
+            <artifactId>nrjavaserial</artifactId>
+            <version>3.12.0</version>
+            <scope>system</scope>
+            <systemPath>C:/KASSAlibs/nrjavaserial-3.12.0.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>RXTXcomm</groupId>
+            <artifactId>RXTXcomm</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>C:/KASSAlibs/RXTXcomm.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xerces</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>C:/KASSAlibs/xerces.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>zxing</groupId>
+            <artifactId>zxing</artifactId>
+            <version>2.2</version>
+            <scope>system</scope>
+            <systemPath>C:/KASSAlibs/zxing-2.2.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <includeSystemScope>true</includeSystemScope>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
