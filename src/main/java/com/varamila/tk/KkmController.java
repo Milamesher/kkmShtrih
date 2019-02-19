@@ -16,9 +16,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
+/**
+
+ * Сервис управления ККМ
+ */
 @RestController
 @RequestMapping("/toSFPrinter")
 public class KkmController {
+
     private static String companyName="";
     private static String companyAddress="";
     private static ShtrihFiscalPrinter printer;
@@ -31,7 +36,9 @@ public class KkmController {
     private static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
     private static final String PHONE_PATTERN = "[+]7\\d{10}";
 
-    //инициализация наименования компании
+    /**
+     * Инициализировать наименование компании.
+     */
     private static void setCompanyName() {
         companyName=companyAddress="";
         try {
@@ -48,21 +55,27 @@ public class KkmController {
                 companyName=list.get(0);
             }
             else
-                writeLogString("Ошибка инициализации названия компании (tomcat home folder - companyName.txt - 1 строка)");
+                writeLogString("Ошибка инициализации названия компании (tomcat home folder - companyName.txt - 1 строка)",true);
             if (list.size()>=2) {
                 companyAddress=list.get(1);
             }
             else
-                writeLogString("Ошибка инициализации адреса компании (tomcat home folder - companyName.txt - 2 строка)");
+                writeLogString("Ошибка инициализации адреса компании (tomcat home folder - companyName.txt - 2 строка)",true);
 
         }
         catch (Exception e) {
-            writeLogString("Ошибка инициализации названия и адреса компании (tomcat home folder - companyName.txt - 1,2 строка)");
+            writeLogString("Ошибка инициализации названия и адреса компании (tomcat home folder - companyName.txt - 1,2 строка)",true);
         }
         companyName=setCoolString(companyName);
         companyAddress=setCoolString(companyAddress);
     }
-    //уточняем размер для красивой печати
+
+    /**
+     * Уточнить размер для красивой печати.
+     *
+     * @param s Строка для печати
+     * @return String Строка с пробелами
+     */
     private static String setCoolString(String s) {
         if (s.length()!=0) {
             while (s.length() > 33)
@@ -79,9 +92,14 @@ public class KkmController {
         return s;
     }
 
-    //запись лога
-    private static void writeLogString(String aMsg) {
-        error=aMsg;
+    /**
+     * Записать лог.
+     *
+     * @param aMsg Сообщение
+     * @param isError Ошибка?
+     */
+    private static void writeLogString(String aMsg, Boolean isError) {
+        if (isError) error+=aMsg+" ";
         try {
             File f0 = new File(folder);
             if (!f0.exists()) f0.mkdir();
@@ -104,10 +122,15 @@ public class KkmController {
         } catch (Exception e) {e.printStackTrace();}
     }
 
-    //получаю объект класса
+    /**
+     * Получить объект класса.
+     *
+     * @param json json с объектом
+     * @return Kkm Информация для ККМ
+     */
     private static Kkm getKkm(String json) {
         setCompanyName();
-        writeLogString("Полученный json (" + json + ")");
+        writeLogString("Полученный json (" + json + ")",false);
         Gson gson = new GsonBuilder()
                 .setPrettyPrinting()
                 .create();
@@ -116,13 +139,15 @@ public class KkmController {
             k = gson.fromJson(json, Kkm.class);
         }
         catch (JsonSyntaxException e) {
-            writeLogString("Не удалось распарсить json (" + e.getMessage() + ")");
+            writeLogString("Не удалось распарсить json (" + e.getMessage() + ")",true);
         }
         return k;
     }
 
-    //инициализирую ккм
-    private static void initializePrinter() throws JposException {
+    /**
+     * Инициализировать ККМ.
+     */
+    private static void initializePrinter() {
         try {
             printer = new ShtrihFiscalPrinter(
                     new FiscalPrinter());
@@ -137,58 +162,95 @@ public class KkmController {
             printer.setHeaderLine(2,companyAddress,false);
         }
         catch (Exception e) {
-            if (e.getMessage()!=null) writeLogString("ККМ не инициализирован (" + e.getMessage() + ")");
-            else writeLogString("ККМ не инициализирован (" + e.toString() + ")");
+            if (e.getMessage()!=null) writeLogString("ККМ не инициализирован (" + e.getMessage() + ")",true);
+            else writeLogString("ККМ не инициализирован (" + e.toString() + ")",true);
         }
     }
-    //задание имени кассира
+
+    /**
+     * Задать имя кассира.
+     *
+     * @param fio Кассир
+     */
     private static void SetKassir(String fio) {
         try {
             //если смена закрыта - по стандарту
             if (!printer.getDayOpened()) {
                 if (fio!=null) {
                     printer.setPOSID("1", fio);
-                    writeLogString("Задано имя кассира: '" + fio + "'");
+                    writeLogString("Задано имя кассира: '" + fio + "'",false);
                 }
                 else
-                    writeLogString("Ошибка инициализации имени кассира: имя кассира null");
+                    writeLogString("Ошибка инициализации имени кассира: имя кассира null",true);
             }
             else {
-                writeLogString("Смена не закрыта, имя кассира не меняем.");
+                writeLogString("Смена не закрыта, имя кассира не меняем.",false);
             }
         }
         catch (Exception e) {
-            if (fio!=null) writeLogString("Ошибка назначения ФИО кассира: '" + fio + "' (" + e.getMessage() + ")");
-            else writeLogString("Ошибка назначения ФИО кассира: null (" + e.getMessage() + ")");
+            if (fio!=null) writeLogString("Ошибка назначения ФИО кассира: '" + fio + "' (" + e.getMessage() + ")",true);
+            else writeLogString("Ошибка назначения ФИО кассира: null (" + e.getMessage() + ")",true);
         }
     }
 
-    //получаю json от медоса и печатаю чек продажи
-    private static void Print(Kkm k) throws JposException, UnsupportedEncodingException {
-        SetKassir(k.getFIO());
+    /**
+     * Проверить общую сумму, сумму по позициям.
+     *
+     * @param k ККМ
+     * @param sale true - продажа, false - возврат
+     * @return Kkm Информация для ККМ
+     */
+    private static Boolean checkSum(Kkm k,Boolean sale) {
+        Boolean flag=true;
+        BigDecimal sum=BigDecimal.ZERO;
+        for (Position p : k.getPos()) {
+            if (p != null)   sum=sum.add(p.getSum());
+            BigDecimal price=p.getPrice();
+            if ((new BigDecimal(p.getCount()).multiply(price)).compareTo(p.getSum())!=0) {
+                writeLogString("Сумма в позиции в чеке не равна рассчитанной (" + p.getCode() + ")",true);
+                error= "{status: \"error\",errorname: \"_errorname_\"}".replace("_errorname_",error);
+                flag=false;
+            }
+        }
+        if (k.getTotalPaymentSum()!=null && sum.compareTo(k.getTotalPaymentSum())!=0 && sale ||
+                k.getTotalRefundSum()!=null && sum.compareTo(k.getTotalRefundSum())!=0 && !sale) {
+            writeLogString("Сумма по позициям в чеке не равна рассчитанной!",true);
+            error= "{status: \"error\",errorname: \"_errorname_\"}".replace("_errorname_",error);
+            flag=false;
+        }
+        return flag;
+    }
 
-        String paymentType="0";
-        if (k.getIsTerminalPayment()) paymentType="20";
-        try {
-            printer.beginFiscalReceipt(true);
-            /*printer.printRecMessage(companyName);
-            printer.printRecMessage("ДОБРО ПОЖАЛОВАТЬ!");*/
+    /**
+     * Печатать чек продажи/возврата.
+     *
+     * @param k ККМ
+     */
+    private static void Print(Kkm k) {
+        Boolean sale = k.getFunction().equals("makePayment");
+        if (checkSum(k,sale)) {
+            writeLogString("Печать чека "+(sale? "продажи" : "возврата"),false);
+            SetKassir(k.getFIO());
 
+            String paymentType="0";
+            if (k.getIsTerminalPayment()) paymentType="20";
             try {
-                if (k.getIsElectronic()) {
-                    if (k.getCustomerPhone() != null && !k.getCustomerPhone().equals("") && k.getCustomerPhone().startsWith("+7"))
-                        printer.fsWriteCustomerPhone(k.getCustomerPhone());
-                    if (k.getCustomerPhone() != null && !k.getCustomerPhone().equals("") && k.getCustomerPhone().contains("@"))
-                        printer.fsWriteCustomerEmail(k.getCustomerPhone());
+                printer.beginFiscalReceipt(true);
+                try {
+                    if (k.getIsElectronic()) {
+                        if (k.getCustomerPhone() != null && !k.getCustomerPhone().equals("") && k.getCustomerPhone().startsWith("+7"))
+                            printer.fsWriteCustomerPhone(k.getCustomerPhone());
+                        if (k.getCustomerPhone() != null && !k.getCustomerPhone().equals("") && k.getCustomerPhone().contains("@"))
+                            printer.fsWriteCustomerEmail(k.getCustomerPhone());
+                    }
+                }
+                catch (Exception e) {
+                    writeLogString("Ошибка настройки телефона/email в чеке (" + e.getMessage() + ")",true);
                 }
             }
             catch (Exception e) {
-                writeLogString("Ошибка настройки телефона/email в чеке продажи (" + e.getMessage() + ")");
+                writeLogString("Ошибка инициации печати чека (" + e.getMessage() + ")",true);
             }
-        }
-        catch (Exception e) {
-            writeLogString("Ошибка инициации печати чека продажи (" + e.getMessage() + ")");
-        }
         /* Price - стоимость позиции в копейках
            Quantity - количество в граммах (1 штука = 1000) - надо бы проверить!
            vatInfo - номер налога - ?
@@ -196,92 +258,70 @@ public class KkmController {
            unitName - название единицы товара
            printZReport - Day end required
         * */
-        for (Position p : k.getPos()) {
-            //writeLogString("Начаты позиции");
-            if (p != null) { //тупо-криво, но gson ><
-                try {
-                    printer.printRecItem(p.getCode()+" " + p.getName(), p.getSum().multiply(new BigDecimal(100)).longValue(), p.getCount() * 1000, 0, p.getPrice().multiply(new BigDecimal(100)).longValue(), "шт.");
-                    //printName("(" + p.getName() + ")");
+            for (Position p : k.getPos()) {
+                if (p != null) { //тупо-криво, но gson ><
+                    try {
+                        if (sale) printer.printRecItem(p.getCode()+" " + p.getName(), p.getSum().multiply(new BigDecimal(100)).longValue(), p.getCount() * 1000, 0, p.getPrice().multiply(new BigDecimal(100)).longValue(), "шт.");
+                        else printer.printRecItemRefund(p.getCode()+" " + p.getName(), p.getSum().multiply(new BigDecimal(100)).longValue(), p.getCount() * 1000, 0, p.getPrice().multiply(new BigDecimal(100)).longValue(), "шт.");
+                    }
+                    catch (Exception e) {
+                        writeLogString("Ошибка печати позиции в чеке (" + e.getMessage() + ")",true);
+                    }
+                    if (sale) {
+                        try {
+                            String str = "Ставка НДС " + p.getTaxName() + "%        =" + p.getTaxSum();
+                            while (str.length() <= 35) str = str.replace(" =", "  =");
+                            if (p.getTaxSum() != null && p.getTaxName().compareTo(BigDecimal.ZERO)!=0) printer.printRecMessage(str);
+                        }
+                        catch (Exception e) {
+                            writeLogString("Ошибка печати ставки НДС в чеке продажи (" + e.getMessage() + ")",true);
+                        }
+                    }
                 }
-                catch (Exception e) {
-                    writeLogString("Ошибка печати позиции в чеке продажи (" + e.getMessage() + ")");
-                }
-                try {
-                    String str = "Ставка НДС " + p.getTaxName() + "%        =" + p.getTaxSum();
-                    while (str.length() <= 35) str = str.replace(" =", "  =");
-                    if (p.getTaxSum() != null && p.getTaxName().compareTo(BigDecimal.ZERO)!=0) printer.printRecMessage(str);
-                }
-                catch (Exception e) {
-                    writeLogString("Ошибка печати ставки НДС в чеке продажи (" + e.getMessage() + ")");
+                else {
+                    writeLogString("Исключительная ситуация: пустой или некорректный json",true);
                 }
             }
-            else {
-                writeLogString("Исключительная ситуация: пустой или некорректный json");
-            }
-        }
-        try {
-            printer.printRecMessage("------------------------------------");
-            String str = "Итого НДС " + "                   =" + k.getTotalTaxSum();
-            while (str.length() <= 35) str = str.replace(" =", "  =");
-            if (k.getTotalTaxSum() != null && k.getTotalTaxSum().compareTo(BigDecimal.ZERO)!=0) printer.printRecMessage(str);
-        }
-        catch (Exception e) {
-            writeLogString("Ошибка печати ИТОГО в чеке продажи (" + e.getMessage() + ")");
-        }
-        try {
-            printer.printRecTotal(k.getTotalPaymentSum().multiply(new BigDecimal(100)).longValue(), k.getTotalPaymentSum().multiply(new BigDecimal(100)).longValue(), paymentType);
-        }
-        catch (Exception e) {
-            if (e.getMessage().toString().contains("Неверное состояние"))
-                writeLogString("ККМ в неверном состоянии! Возможно, общая сумма по услугам не равна вычисленной! (" + e.getMessage() + ")");
             try {
-                printer.printRecMessage("ККМ в неверном состоянии!");
+                printer.printRecMessage("------------------------------------");
+                if (sale) {
+                    String str = "Итого НДС " + "                   =" + k.getTotalTaxSum();
+                    while (str.length() <= 35) str = str.replace(" =", "  =");
+                    if (k.getTotalTaxSum() != null && k.getTotalTaxSum().compareTo(BigDecimal.ZERO)!=0) printer.printRecMessage(str);
+                }
             }
-            catch (Exception e0) {
-                writeLogString("Не удалось вывести сообщение на ККМ (о неверном состоянии) (" + e0.getMessage() + ")");
+            catch (Exception e) {
+                writeLogString("Ошибка печати ИТОГО в чеке (" + e.getMessage() + ")",true);
             }
-        }
-        try {
-            printer.endFiscalReceipt(false);
-        }
-        catch (Exception e) {
-            writeLogString("Ошибка завершения чека продажи (" + e.getMessage() + ")");
+            try {
+                if (sale) printer.printRecTotal(k.getTotalPaymentSum().multiply(new BigDecimal(100)).longValue(), k.getTotalPaymentSum().multiply(new BigDecimal(100)).longValue(), paymentType);
+                else printer.printRecTotal(k.getTotalRefundSum().multiply(new BigDecimal(100)).longValue(), k.getTotalRefundSum().multiply(new BigDecimal(100)).longValue(), paymentType);
+            }
+            catch (Exception e) {
+                if (e.getMessage().toString().contains("Неверное состояние"))
+                    writeLogString("ККМ в неверном состоянии! Возможно, общая сумма по услугам не равна вычисленной! (" + e.getMessage() + ")",true);
+                try {
+                    printer.printRecMessage("ККМ в неверном состоянии!");
+                }
+                catch (Exception e0) {
+                    writeLogString("Не удалось вывести сообщение на ККМ (о неверном состоянии) (" + e0.getMessage() + ")",true);
+                }
+            }
+            try {
+                printer.endFiscalReceipt(false);
+            }
+            catch (Exception e) {
+                writeLogString("Ошибка завершения чека (" + e.getMessage() + ")",true);
+            }
         }
     }
 
-    //получаю сумму от медоса и печатаю чек возврата
-    private void printRefund(Kkm k) throws JposException {
-        SetKassir(k.getFIO());
-
-        String paymentType = "0";
-        if (k.getIsTerminalPayment()) paymentType = "20";
-        BigDecimal toRefund = k.getTotalRefundSum();
-        try {
-            printer.beginFiscalReceipt(true);
-        }
-        catch (Exception e) {
-            writeLogString("Ошибка инициации печати чека возврата (" + e.getMessage() + ")");
-        }
-        try {
-            printer.printRecItemRefund("Все услуги", toRefund.multiply(new BigDecimal(100)).longValue(), 1000, 0, toRefund.multiply(new BigDecimal(100)).longValue(), "шт");
-        }
-        catch (Exception e) {
-            writeLogString("Ошибка печати позиции в чеке возврата (" + e.getMessage() + ")");
-        }
-        try {
-            printer.printRecTotal(toRefund.multiply(new BigDecimal(100)).longValue(), toRefund.multiply(new BigDecimal(100)).longValue(), paymentType);
-        }
-        catch (Exception e) {
-            writeLogString("Ошибка ИТОГО в чеке возврата (" + e.getMessage() + ")");
-        }
-        try {
-            printer.endFiscalReceipt(false);
-        }
-        catch (Exception e) {
-            writeLogString("Ошибка завершения чека возврата (" + e.getMessage() + ")");
-        }
-    }
-    //проверка на то, была ли уже попытка напечатать этот чек (true - была, false -  нет
+    /**
+     * Проверить, была ли уже попытка напечатать этот чек (true - была, false -  нет).
+     *
+     * @param idAc Id чека
+     * @param func true - продажа, false - возврат
+     */
     private boolean checkIfIdAccountFirstPrint(String idAc,String func) {
         try {
             File f0 = new File(logFile);
@@ -310,32 +350,39 @@ public class KkmController {
     public String greeting() {
         return "Hello, Spring Boot!";
     }
-    //@PostMapping("/print")
+
+    /**
+     * Точка входа. Обработать запрос, отправить команду на ККМ, вернуть ответ.
+     *
+     * @param data Запрос
+     * @return String Ответ
+     */
     @RequestMapping(value="/print", method=RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public String answerMedOs(@RequestBody String data) throws JposException {
         try {
+            error="";
             System.out.println(data);
             Kkm k = getKkm(data);
             if (k!=null) {
                 if (k.getGotId()!=null) {
                     if (checkIfIdAccountFirstPrint(k.getGotId(),k.getFunction())) {
-                        writeLogString("Полученный id чека: " +k.getGotId() + " (" + k.getFunction() + ").");
-                        writeLogString("Этот id чека: " +k.getGotId() + " уже был получен. Печатать повторно его нельзя.");
+                        writeLogString("Полученный id чека: " +k.getGotId() + " (" + k.getFunction() + ").",false);
+                        writeLogString("Этот id чека: " +k.getGotId() + " уже был получен. Печатать повторно его нельзя.",true);
                         return "{status: \"error\",errorname: \"_errorname_\"}".replace("_errorname_",error);
                     }
-                    else writeLogString("Полученный id чека: " +k.getGotId() + " (" + k.getFunction() + "). Отправлен на печать.");
+                    else writeLogString("Полученный id чека: " +k.getGotId() + " (" + k.getFunction() + "). Отправлен на печать.",false);
                 }
-                else
-                    writeLogString("Полученный id чека = null");
+                else if (k.getFunction().equals("makePayment") || k.getFunction().equals("makeRefund"))
+                    writeLogString("Полученный id чека = null",true);
                 if (k.getIsElectronic()) {
                     Pattern pattern = Pattern.compile(EMAIL_PATTERN);
                     if (k.getCustomerPhone()!=null && k.getCustomerPhone().contains("@") && !pattern.matcher(k.getCustomerPhone()).matches()) {
-                        writeLogString("Получен некорректный email (" + k.getCustomerPhone() + ")");
+                        writeLogString("Получен некорректный email (" + k.getCustomerPhone() + ")",true);
                         return "{status: \"error\",errorname: \"_errorname_\"}".replace("_errorname_",error);
                     }
                     pattern = Pattern.compile(PHONE_PATTERN);
                     if (k.getCustomerPhone()!=null && !k.getCustomerPhone().contains("@") && !pattern.matcher(k.getCustomerPhone()).matches()) {
-                        writeLogString("Получен некорректный номер телефона (" + k.getCustomerPhone() + ")");
+                        writeLogString("Получен некорректный номер телефона (" + k.getCustomerPhone() + ")",true);
                         return "{status: \"error\",errorname: \"_errorname_\"}".replace("_errorname_",error);
                     }
                 }
@@ -347,7 +394,7 @@ public class KkmController {
                             printer.printXReport();
                         }
                         catch (Exception e) {
-                            writeLogString("Ошибка печати X-отчёта (" + e.getMessage() + ")");
+                            writeLogString("Ошибка печати X-отчёта (" + e.getMessage() + ")",true);
                         }
                         break;
                     case "printZReport":
@@ -356,34 +403,23 @@ public class KkmController {
                             printer.printZReport();
                         }
                         catch (Exception e) {
-                            writeLogString("Ошибка печати Z-отчёта (" + e.getMessage() + ")");
+                            writeLogString("Ошибка печати Z-отчёта (" + e.getMessage() + ")",true);
                         }
                         break;
                     case "makePayment":
                         try {
-                            //подсчёт суммы
-                            BigDecimal sum=BigDecimal.ZERO;
-                            for (Position p : k.getPos()) {
-                                if (p != null)   sum=sum.add(p.getSum());
-                                BigDecimal price=p.getPrice();
-                                if ((new BigDecimal(p.getCount()).multiply(price)).compareTo(p.getSum())!=0) {
-                                    writeLogString("Сумма в позиции в чеке не равна рассчитанной (" + p.getCode() + ")");
-                                    return "{status: \"error\",errorname: \"_errorname_\"}".replace("_errorname_",error);
-                                }
-                            }
-                            if (sum.compareTo(k.getTotalPaymentSum())!=0)  writeLogString("Сумма по позициям в чеке не равна рассчитанной!");
-                            else Print(k);
+                             Print(k);
                         }
                         catch (Exception e) {
-                            writeLogString("Ошибка печати чека продажи (" + e.getMessage() + ")");
+                            writeLogString("Ошибка печати чека продажи (" + e.getMessage() + ")",true);
                         }
                         break;
                     case "makeRefund":
                         try {
-                            printRefund(k);
+                            Print(k);
                         }
                         catch (Exception e) {
-                            writeLogString("Ошибка печати чека возврата (" + e.getMessage() + ")");
+                            writeLogString("Ошибка печати чека возврата (" + e.getMessage() + ")",true);
                         }
                         break;
                     case "continuePrint":
@@ -392,21 +428,21 @@ public class KkmController {
                             printer.executeCommand(tx,0);
                         }
                         catch (Exception e) {
-                            if (e.getMessage()!=null) writeLogString("getState: " + printer.getState() + ". Не удалось возобновить печать! (" + e.getMessage() + ")");
-                            else writeLogString("getState: " + printer.getState() + ". Не удалось возобновить печать! (" + e.toString() + ")");
+                            if (e.getMessage()!=null) writeLogString("getState: " + printer.getState() + ". Не удалось возобновить печать! (" + e.getMessage() + ")",true);
+                            else writeLogString("getState: " + printer.getState() + ". Не удалось возобновить печать! (" + e.toString() + ")",true);
                         }
                         break;
                     default:
-                        writeLogString("Была получена недекларированная команда (" + k.getFunction() + ")");
+                        writeLogString("Была получена недекларированная команда (" + k.getFunction() + ")",true);
                         break;
                 }
             }
         } catch (Exception e0) {
-            writeLogString("Исключительная ситуация (" + e0.getMessage() + ")");
+            writeLogString("Исключительная ситуация (" + e0.getMessage() + ")",true);
         }
         if (error.equals(""))  return "{status: \"ok\"}";
         else {
-            if (error.toString().contains("Day end")) {
+            if (error.contains("Day end")) {
                 printer.printRecMessage("24 часа истекли, нужен Z-отчёт");
                 initializePrinter();
             }
